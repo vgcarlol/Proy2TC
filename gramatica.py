@@ -11,11 +11,18 @@ def cargar_gramatica(nombre_archivo):
         print(f"Error: El archivo {nombre_archivo} no se encontró.")
         return []
 
-# Función para validar la sintaxis de una producción
 def validar_produccion(produccion):
-    # Regex mejorada para aceptar producciones más complejas
-    regex = r"^[A-Z][a-zA-Z0-9_]*\s*->\s*((([a-z][a-zA-Z0-9_]*|\d+)|([A-Z][a-zA-Z0-9_]*))(\s*\|\s*(([a-z][a-zA-Z0-9_]*|\d+)|([A-Z][a-zA-Z0-9_]*)))*)*$"
-    return re.match(regex, produccion)
+    # Regex más permisivo que acepta cualquier producción con un '->'
+    regex = r"^\s*[A-Z][A-Za-z0-9]*\s*->\s*.+$"
+    if re.match(regex, produccion):
+        return True
+    else:
+        print(f"Error: La producción '{produccion}' no está bien escrita.")
+        return False
+
+
+
+
 
 # Función para validar una gramática completa
 def validar_gramatica(gramatica):
@@ -126,17 +133,17 @@ def eliminar_producciones_unarias(gramatica):
 # Función principal para ejecutar el programa
 def main():
     # Cargar gramáticas desde archivos
-    gramatica1 = cargar_gramatica("gramatica1.txt")
-    gramatica2 = cargar_gramatica("gramatica2.txt")
+    gramatica1 = cargar_gramatica("gramaticas/gramatica1.txt")
+    #gramatica2 = cargar_gramatica("gramatica2.txt")
 
     # Validar gramáticas
     if not validar_gramatica(gramatica1):
         print("Gramática 1 contiene errores. La ejecución se detiene.")
         return
 
-    if not validar_gramatica(gramatica2):
-        print("Gramática 2 contiene errores. La ejecución se detiene.")
-        return
+    #if not validar_gramatica(gramatica2):
+    #    print("Gramática 2 contiene errores. La ejecución se detiene.")
+    #    return
 
     # Mostrar Gramática 1 original
     print("\nGramática 1 original:")
@@ -157,22 +164,22 @@ def main():
         print(produccion)
 
     # Mostrar Gramática 2 original
-    print("\nGramática 2 original:")
-    for produccion in gramatica2:
-        print(produccion)
+    #print("\nGramática 2 original:")
+    #for produccion in gramatica2:
+    #    print(produccion)
 
     # Eliminar producciones-𝜀 de Gramática 2
-    print("\nEliminando producciones-𝜀 de Gramática 2...")
-    nueva_gramatica2 = eliminar_producciones_epsilon(gramatica2)
+    #print("\nEliminando producciones-𝜀 de Gramática 2...")
+    #nueva_gramatica2 = eliminar_producciones_epsilon(gramatica2)
 
     # Eliminar producciones unarias de Gramática 2
-    print("\nEliminando producciones unarias de Gramática 2...")
-    nueva_gramatica2 = eliminar_producciones_unarias(nueva_gramatica2)
+    #print("\nEliminando producciones unarias de Gramática 2...")
+    #nueva_gramatica2 = eliminar_producciones_unarias(nueva_gramatica2)
 
     # Mostrar la gramática resultante sin producciones-𝜀 y sin unarias
-    print("\nGramática 2 sin producciones-𝜀 y sin producciones unarias:")
-    for produccion in nueva_gramatica2:
-        print(produccion)
+    #print("\nGramática 2 sin producciones-𝜀 y sin producciones unarias:")
+    #for produccion in nueva_gramatica2:
+    #    print(produccion)
 
 if __name__ == "__main__":
     main()

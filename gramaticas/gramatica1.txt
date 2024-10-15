@@ -1,0 +1,6 @@
+S -> NP VP
+NP -> Det N
+VP -> V NP
+Det -> a | the
+N -> cat | dog
+V -> eats | drinks
