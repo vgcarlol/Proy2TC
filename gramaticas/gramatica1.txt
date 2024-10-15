@@ -1,6 +1,12 @@
-S -> NP VP
-NP -> Det N
-VP -> V NP
-Det -> a | the
-N -> cat | dog
-V -> eats | drinks
+E -> T X | F Y | L Z | id
+X -> P W | P T
+T -> F Y | L Z | id
+Y -> M V | M F
+F -> L Z | id
+Z -> E R
+W -> T X
+V -> F Y
+L -> (
+R -> )
+P -> +
+M -> *
