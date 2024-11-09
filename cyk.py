@@ -9,23 +9,24 @@ from gramatica import (
 
 def cargar_gramatica_cnf(gramatica):
     reglas = defaultdict(list)
-    reglas["S'"] = [("E",)]  # Agregar producción inicial
-
     terminales = set()
 
+    # Procesamos cada producción en la gramática
     for produccion in gramatica:
         no_terminal, cuerpo = produccion.split("->")
         no_terminal = no_terminal.strip()
         alternativas = [tuple(alt.strip().split()) for alt in cuerpo.split('|')]
         reglas[no_terminal].extend(alternativas)
 
+        # Identificar terminales (por ejemplo, '+', '*', 'id')
         for alternativa in alternativas:
             for simbolo in alternativa:
-                if not simbolo.isupper():  # Detectar terminales
+                if simbolo.islower() or not simbolo.isalnum():
                     terminales.add(simbolo)
 
+    # Asegurar que cada terminal tenga su propia regla
     for terminal in terminales:
-        reglas[terminal] = [(terminal,)]  # Agregar reglas para terminales
+        reglas[terminal] = [(terminal,)]
 
     return reglas
 
@@ -33,55 +34,37 @@ def cyk_algorithm(grammar, sentence):
     words = sentence.split()
     n = len(words)
 
-    # Crear tabla vacía
+    # Crear una tabla CYK de tamaño n x n
     table = [[set() for _ in range(n)] for _ in range(n)]
 
-    # Crear reglas inversas
+    # Crear un diccionario inverso para buscar producciones por su cuerpo
     inverse_rules = defaultdict(set)
     for left, right in grammar.items():
         for production in right:
             inverse_rules[production].add(left)
 
-    # Mostrar reglas inversas
-    print("\nReglas inversas:")
-    for key, value in inverse_rules.items():
-        print(f"{key} -> {value}")
-
-    # Inicializar la tabla con las palabras
-    print("\nInicializando tabla:")
+    # Llenar la diagonal de la tabla con las producciones que generan cada palabra
     for j in range(n):
         word = words[j]
         if (word,) in inverse_rules:
             table[j][j] = inverse_rules[(word,)]
-            print(f"Celda [{j},{j}] inicializada con: {inverse_rules[(word,)]}")
         else:
             print(f"Error: La palabra '{word}' no tiene una producción válida.")
 
-    # Construcción de la tabla CYK
-    print("\n*** Comenzando la construcción de la tabla CYK ***")
-    for length in range(2, n + 1):  # Longitud de las subcadenas
+    # Llenar el resto de la tabla usando programación dinámica
+    for length in range(2, n + 1):  # Longitud de subcadenas
         for i in range(n - length + 1):
             j = i + length - 1
-            print(f"\nAnalizando subcadena de longitud {length}, celdas [{i}:{j}]")
             for k in range(i, j):
-                print(f"  Combinando celdas [{i},{k}] y [{k + 1},{j}]")
+                # Combinamos los no-terminales en las celdas [i, k] y [k + 1, j]
                 for B in table[i][k]:
                     for C in table[k + 1][j]:
-                        print(f"    Intentando combinar: {B} + {C}")
                         if (B, C) in inverse_rules:
-                            print(f"    Producción encontrada: {inverse_rules[(B, C)]}")
                             table[i][j].update(inverse_rules[(B, C)])
-                            print(f"    Actualizando celda [{i},{j}] con: {table[i][j]}")
-                        else:
-                            print(f"    No se encontró producción para: {B} + {C}")
+                            print(f"Actualizando celda [{i},{j}] con: {inverse_rules[(B, C)]}")
 
-    # Verificar si S' está en la celda inicial
-    pertenece = "S'" in table[0][n - 1]
-    print(f"\nTabla final: {table}")
-    if pertenece:
-        print("Resultado: SÍ, la frase pertenece al lenguaje.")
-    else:
-        print("Resultado: NO, la frase NO pertenece al lenguaje.")
+    # Verificar si el símbolo inicial 'E' está en la celda [0][n-1]
+    pertenece = 'E' in table[0][n - 1]
     return pertenece, table
 
 def ejecutar_cyk(nombre_archivo, frase):
@@ -112,10 +95,11 @@ def ejecutar_cyk(nombre_archivo, frase):
 
     print(f"Tiempo de ejecución: {end_time - start_time:.6f} segundos")
 
+    # Mostrar la tabla CYK
     print("\nTabla CYK:")
     for fila in tabla:
         print([list(celda) for celda in fila])
 
 if __name__ == "__main__":
-    ejecutar_cyk("gramaticas/gramatica1.txt", "( id )")
+    ejecutar_cyk("gramaticas/gramatica1.txt", "id + id * id")
     ejecutar_cyk("gramaticas/gramatica2.txt", "id + id")
